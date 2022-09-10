@@ -7,5 +7,5 @@ import (
 func main() {
 	router := gin.Default()
 
-	router.Run()
+	router.Run("localhost:9090")
 }
