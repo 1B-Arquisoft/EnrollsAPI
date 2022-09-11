@@ -30,11 +30,10 @@ func (server *Server) addStudent(c *gin.Context) {
 
 }
 
-/*?
+/*
 * MATCH (student:Student),(group:Group) WHERE student.id = 1 and group.id = 1
-return student,group
-? sdkakds
-! asdjlsadjas
+* return student,group
+?
 */
 type AddGroupToStudentRequest struct {
 	IDStudent int64 `json:"id_student" binding:"required"`
@@ -68,6 +67,47 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	result, err = server.store.Run(`MATCH (student:Student),(group:Group)
 	WHERE student.id = $id_student and group.id = $id_group
 	CREATE (student)-[:Enrolls]->(group)`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
+
+}
+
+type AddCareerToStudentRequest struct {
+	IDStudent int64 `json:"id_student" binding:"required"`
+	IDCareer  int64 `json:"id_career" binding:"required"`
+}
+
+func (server *Server) AddCareerToStudent(c *gin.Context) {
+	var req AddCareerToStudentRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (student:Student),(career:Career)
+	WHERE student.id = $id_student and career.id = $id_career
+	RETURN EXISTS((student)-[:Study]->(career))`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if result.Next() {
+		if result.Record().Values[0].(bool) {
+			c.JSON(http.StatusBadRequest, errorResponse("El usuario ya esta inscrito en la asignatura"))
+			return
+		}
+	}
+
+	result, err = server.store.Run(`MATCH (student:Student),(career:Career)
+	WHERE student.id = $id_student and career.id = $id_career
+	CREATE (student)-[:Study]->(career)`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

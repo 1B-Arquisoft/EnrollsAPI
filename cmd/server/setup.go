@@ -49,7 +49,7 @@ func Setup() *Server {
 	//? Endpoint | Añadir Materia a carrera -> {id_materia,id_carrera}
 	router.POST("/Subjects/Assing/Carrers")
 	//? Endpoint | Añadir Estudiante a carrera -> {id_materia,id_carrera}
-	router.POST("/Students/Assing/Carrers")
+	router.POST("/Students/Assing/Carrers", server.AddCareerToStudent)
 	//*--------------------------------------------*
 
 	//*------Obtener Información Estudiante--------*
