@@ -38,37 +38,37 @@ func Setup() *Server {
 
 	//*-------Asignacion de relaciones------------*
 	//? Endpoint | Asignar profe a grupo -> {id_profesor,id_grupo}
-	router.POST("/Groups/Assing/Teachers")
+	router.POST("/Groups/Assing/Teachers", server.AddTeacherToGroup)
 	//? Endpoint | Añadir grupo a materia -> {id_grupo,id_materia}
-	router.POST("/Groups/Assing/Subjects")
+	router.POST("/Groups/Assing/Subjects", server.AddGroupToSubject)
 	//? Endpoint | Vincular grupo a semestre -> {id_grupo,id_semestre}
-	router.POST("/Groups/Assing/Semesters")
+	router.POST("/Groups/Assing/Semesters", server.AddGroupToSemester)
 	//*--------------------------------------------*
 
 	//*------Asignar relaciones a carrera--------*
 	//? Endpoint | Añadir Materia a carrera -> {id_materia,id_carrera}
-	router.POST("/Subjects/Assing/Carrers")
+	router.POST("/Subjects/Assing/Carrers", server.AddSubjectToCareer)
 	//? Endpoint | Añadir Estudiante a carrera -> {id_materia,id_carrera}
 	router.POST("/Students/Assing/Carrers", server.AddCareerToStudent)
 	//*--------------------------------------------*
 
 	//*------Obtener Información Estudiante--------*
 	//? Endpoint | Obtener grupos inscritos -> {id_estudiante,opcional:semestre}
-	router.GET("/Students/Groups")
+	router.GET("/Students/:id/Groups/")
 	//? Endpoint | Obtener carreras de un estudiante -> {id_estudiante}
-	router.GET("/Students/Careers")
+	router.GET("/Students/:id/Careers/")
 	//*--------------------------------------------*
 
 	//*------Obtener Información Profesor--------*
 	//? Endpoint | Obtener grupos inscritos -> {id_estudiante,opcional:semestre}
-	router.GET("/Teacher/Groups")
+	router.GET("/Teacher/:id/Groups")
 	//*--------------------------------------------*
 
 	//*--------Obtener información Grupos----------*
 	//? Endpoint | Obtener grupos de la materia -> {id_materia,opcional:semestre}
-	router.GET("/Groups/BelongTo")
+	router.GET("/Groups/:id/BelongTo")
 	//? Endpoint | Obtener grupos en los que dicta un profe -> {id_profe,opcional: semestre}
-	router.GET("/Groups/TeachBy")
+	router.GET("/Groups/:id/TeachBy")
 	//*--------------------------------------------*
 
 	server.router = router
