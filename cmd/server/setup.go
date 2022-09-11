@@ -16,7 +16,7 @@ func Setup() *Server {
 
 	//*------------Creación de Nodos--------------*
 	//? Endpoint | Agregar nodo materia -> {id_materia}
-	router.PUT("/Subjects")
+	router.PUT("/Subjects", server.addSubject)
 	//? Endpoint | Agregar nodo grupo -> {id_grupo}
 	router.PUT("/Groups", server.addGroup)
 	//? Endpoint | Agregar nodo profesor -> {id_profesor}
@@ -24,14 +24,14 @@ func Setup() *Server {
 	//? Endpoint | Agregar nodo estudiante -> {id_estudiantes}
 	router.PUT("/Students", server.addStudent)
 	//? Endpoint | Agregar nodo carrera -> {id_carrera}
-	router.PUT("/Careers")
+	router.PUT("/Careers", server.addCareer)
 	//? Endpoint | Agregar nodo semestre -> {Semestre}
-	router.PUT("/Semesters")
+	router.PUT("/Semesters", server.addSemester)
 	//*--------------------------------------------*
 
 	//*-------Inscripcion de asignaturas----------*
 	//? Endpoint | Inscribir materia -> {id_estudiante,id_grupo}
-	router.POST("/Enroll")
+	router.POST("/Enroll", server.addGroupToStudent)
 	//? Endpoint | Cancelar materia -> {id_estudiante,id_grupo}
 	router.DELETE("/Enroll")
 	//*--------------------------------------------*
