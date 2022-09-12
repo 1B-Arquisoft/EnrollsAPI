@@ -13,6 +13,6 @@ func neo4jConnection() neo4j.Session {
 		log.Fatal("Error Connecting to Neo4J DB")
 	}
 
-	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite, DatabaseName: "inscripciones"})
 	return session
 }

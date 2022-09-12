@@ -116,3 +116,68 @@ func (server *Server) AddCareerToStudent(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 
 }
+
+type getGroupsEnrolledByStudentRequest struct {
+	IDStudent int64  `uri:"id" json:"id" binding:"required"`
+	Semester  string `uri:"semester" json:"semester"`
+}
+
+func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
+	var req getGroupsEnrolledByStudentRequest
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (student:Student)-[:Enrolls]->(group:Group)
+	WHERE student.id = $id
+	RETURN student,collect(group) as groups`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userRecord, err := result.Single()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	groups, _ := userRecord.Get("groups")
+	c.JSON(http.StatusOK, groups)
+
+}
+
+type getCareerByStudentRequest struct {
+	IDStudent int64 `uri:"id" json:"id" binding:"required"`
+}
+
+func (server *Server) getCareersByStudent(c *gin.Context) {
+	var req getCareerByStudentRequest
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (student:Student)-[:Study]->(career:Career)
+	WHERE student.id = $id
+	RETURN student,collect(career) as careers`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userRecord, err := result.Single()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	groups, _ := userRecord.Get("careers")
+	c.JSON(http.StatusOK, groups)
+
+}

@@ -54,21 +54,19 @@ func Setup() *Server {
 
 	//*------Obtener Información Estudiante--------*
 	//? Endpoint | Obtener grupos inscritos -> {id_estudiante,opcional:semestre}
-	router.GET("/Students/:id/Groups/")
+	router.GET("/Students/:id/Groups/:semester", server.getGroupsEnrolledByStudent)
 	//? Endpoint | Obtener carreras de un estudiante -> {id_estudiante}
-	router.GET("/Students/:id/Careers/")
+	router.GET("/Students/:id/Careers/", server.getCareersByStudent)
 	//*--------------------------------------------*
 
-	//*------Obtener Información Profesor--------*
+	//*--------Obtener Información Profesor--------*
 	//? Endpoint | Obtener grupos inscritos -> {id_estudiante,opcional:semestre}
-	router.GET("/Teacher/:id/Groups")
+	router.GET("/Teacher/:id/Groups/:semester", server.getGroupsTaughtbyTeacher)
 	//*--------------------------------------------*
 
-	//*--------Obtener información Grupos----------*
+	//*--------Obtener información Materias----------*
 	//? Endpoint | Obtener grupos de la materia -> {id_materia,opcional:semestre}
-	router.GET("/Groups/:id/BelongTo")
-	//? Endpoint | Obtener grupos en los que dicta un profe -> {id_profe,opcional: semestre}
-	router.GET("/Groups/:id/TeachBy")
+	router.GET("/Subject/:id/Groups/:semester", server.getGroupsBySubject)
 	//*--------------------------------------------*
 
 	server.router = router

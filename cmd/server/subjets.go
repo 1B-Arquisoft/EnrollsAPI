@@ -69,3 +69,36 @@ func (server *Server) AddSubjectToCareer(c *gin.Context) {
 
 	c.JSON(http.StatusOK, result)
 }
+
+type getGroupsBySubjectRequest struct {
+	IDGroup  int64  `uri:"id" json:"id" binding:"required"`
+	Semester string `uri:"semester" json:"semester"`
+}
+
+func (server *Server) getGroupsBySubject(c *gin.Context) {
+	var req getGroupsBySubjectRequest
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (subject:Subject)-[:Has]->(group:Group)
+	WHERE subject.id = $id 
+	RETURN subject,collect(group) as group`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userRecord, err := result.Single()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	groups, _ := userRecord.Get("group")
+	c.JSON(http.StatusOK, groups)
+
+}

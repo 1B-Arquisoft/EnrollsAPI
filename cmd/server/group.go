@@ -8,7 +8,8 @@ import (
 )
 
 type AddGroupRequest struct {
-	ID int64 `json:"id" binding:"required"`
+	ID       int64  `json:"id" binding:"required"`
+	Semester string `json:"Semester" binding:"required"`
 }
 
 func (server *Server) addGroup(c *gin.Context) {
@@ -20,7 +21,7 @@ func (server *Server) addGroup(c *gin.Context) {
 		return
 	}
 
-	result, err := server.store.Run("CREATE (est:Group{id:$id})", u.StructToMap(req))
+	result, err := server.store.Run("CREATE (est:Group{id:$id,semester:$semester})", u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
 		return
@@ -36,7 +37,7 @@ type AddGroupToSubjectRequest struct {
 }
 
 func (server *Server) AddGroupToSubject(c *gin.Context) {
-	var req AddGroupToStudentRequest
+	var req AddGroupToSubjectRequest
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -61,7 +62,6 @@ func (server *Server) AddGroupToSubject(c *gin.Context) {
 
 	result, err = server.store.Run(`MATCH (subject:Subject),(group:Group)
 	WHERE subject.id = $id_subject and group.id = $id_group
-	CREATE (group)-[:Belongs]->(subject)
 	CREATE (subject)-[:Has]->(group)`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
@@ -87,7 +87,7 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 
 	result, err := server.store.Run(`MATCH (semester:Semester),(group:Group)
 	WHERE semester.year = $semester_period and group.id = $id_group
-	RETURN EXISTS((group)-[:Taught]->(semester))`, u.StructToMap(req))
+	RETURN EXISTS((group)-[:Ocurred]->(semester))`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -102,7 +102,7 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 
 	result, err = server.store.Run(`MATCH (semester:Semester),(group:Group)
 	WHERE semester.year = $semester_period and group.id = $id_group
-	CREATE (group)-[:Taught]->(semester)`, u.StructToMap(req))
+	CREATE (group)-[:Ocurred]->(semester)`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return

@@ -20,7 +20,7 @@ func (server *Server) addTeacher(c *gin.Context) {
 		return
 	}
 
-	result, err := server.store.Run("CREATE (Teacher{id:$id})", u.StructToMap(req))
+	result, err := server.store.Run("CREATE (tech:Teacher{id:$id})", u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
 		return
@@ -31,8 +31,8 @@ func (server *Server) addTeacher(c *gin.Context) {
 }
 
 type AddTeacherToGroupRequest struct {
-	SemesterPeriod int64 `json:"semester_period" binding:"required"`
-	IDGroup        int64 `json:"id_subject" binding:"required"`
+	IDTeacher int64 `json:"id_teacher" binding:"required"`
+	IDGroup   int64 `json:"id_group" binding:"required"`
 }
 
 func (server *Server) AddTeacherToGroup(c *gin.Context) {
@@ -44,9 +44,9 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 		return
 	}
 
-	result, err := server.store.Run(`MATCH (semester:Semester),(group:Group)
-	WHERE semester.year = $semester_period and group.id = $id_group
-	RETURN EXISTS((group)-[:Taught]->(semester))`, u.StructToMap(req))
+	result, err := server.store.Run(`MATCH (teacher:Teacher),(group:Group)
+	WHERE teacher.id = $id_teacher and group.id = $id_group
+	RETURN EXISTS((teacher)-[:Taught]->(group))`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
@@ -59,13 +59,46 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 		}
 	}
 
-	result, err = server.store.Run(`MATCH (semester:Semester),(group:Group)
-	WHERE semester.year = $semester_period and group.id = $id_group
-	CREATE (group)-[:Taught]->(semester)`, u.StructToMap(req))
+	result, err = server.store.Run(`MATCH (teacher:Teacher),(group:Group)
+	WHERE teacher.id = $id_teacher and group.id = $id_group
+	CREATE (teacher)-[:Taught]->(group)`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+type getGroupsTaughtbyTeacherRequest struct {
+	IDTeacher int64  `uri:"id" json:"id" binding:"required"`
+	Semester  string `uri:"semester" json:"semester"`
+}
+
+func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
+	var req getGroupsTaughtbyTeacherRequest
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (teacher:Teacher)-[:Taught]->(group:Group)
+	WHERE teacher.id = $id
+	RETURN teacher,collect(group) as group`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userRecord, err := result.Single()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	groups, _ := userRecord.Get("group")
+	c.JSON(http.StatusOK, groups)
+
 }
