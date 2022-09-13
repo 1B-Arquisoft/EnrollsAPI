@@ -7,7 +7,7 @@ import (
 )
 
 func neo4jConnection() neo4j.Session {
-	driver, err := neo4j.NewDriver("bolt://localhost:7687", neo4j.BasicAuth("neo4j", `}8=R"&g38I^pY1YV>APQ`, ""))
+	driver, err := neo4j.NewDriver("bolt://localhost:7687", neo4j.BasicAuth("neo4j", `test`, ""))
 
 	if err != nil {
 		log.Fatal("Error Connecting to Neo4J DB")
