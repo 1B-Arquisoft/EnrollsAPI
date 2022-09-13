@@ -9,7 +9,7 @@ import (
 
 type AddGroupRequest struct {
 	ID       int64  `json:"id" binding:"required"`
-	Semester string `json:"Semester" binding:"required"`
+	Semester string `json:"semester" binding:"required"`
 }
 
 func (server *Server) addGroup(c *gin.Context) {
@@ -23,7 +23,7 @@ func (server *Server) addGroup(c *gin.Context) {
 
 	result, err := server.store.Run("CREATE (est:Group{id:$id,semester:$semester})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
+		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
 		return
 	}
 

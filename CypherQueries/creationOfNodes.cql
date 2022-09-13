@@ -62,4 +62,6 @@ create
 (est6)-[:Enrolled]->(ingsistemas)
 (est6)-[:Enrolled]->(compscience),
 
-
+//? DELETE ALL NODES
+MATCH (n)
+DETACH DELETE n

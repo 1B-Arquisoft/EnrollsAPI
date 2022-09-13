@@ -9,6 +9,9 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 RUN apk update && apk add bash
+ENV NEO4J_HOST=neo4j://localhost:7687
+ENV NEO4J_USER=neo4j
+ENV NEO4J_PASSWORD=test
 
 # Copy app files
 COPY . .
