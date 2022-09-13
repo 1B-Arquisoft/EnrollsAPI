@@ -8,12 +8,14 @@ WORKDIR /app
 COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
+RUN apk update && apk add bash
+
 # Copy app files
 COPY . .
 # Build app
 RUN go build -o app
 
 # Expose port
-EXPOSE 8080
-# Exec built binary
-CMD ./app
+EXPOSE 8888
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["./app"]

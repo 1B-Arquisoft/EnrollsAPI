@@ -22,7 +22,7 @@ func (server *Server) addStudent(c *gin.Context) {
 
 	result, err := server.store.Run("CREATE (est:Student{id:$id})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
+		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
 		return
 	}
 
