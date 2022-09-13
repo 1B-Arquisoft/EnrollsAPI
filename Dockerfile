@@ -9,9 +9,10 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 RUN apk update && apk add bash
-ENV NEO4J_HOST=neo4j://localhost:7687
+ENV NEO4J_HOST=neo4j+s://03181944.databases.neo4j.io
 ENV NEO4J_USER=neo4j
-ENV NEO4J_PASSWORD=test
+ENV NEO4J_PASSWORD=5V9YyRWxq3OqfFmEUGLL1BqPHARTRrSYVA19i3d_j6w
+ENV API_URL=0.0.0.0:8080
 
 # Copy app files
 COPY . .
@@ -20,5 +21,4 @@ RUN go build -o app
 
 # Expose port
 EXPOSE 8888
-ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["./app"]
