@@ -2,10 +2,11 @@ package main
 
 import (
 	"SIA/InscripcionAPI/cmd/server"
+	u "SIA/InscripcionAPI/cmd/utils"
 )
 
 func main() {
 	server := server.Setup()
 
-	server.Start("0.0.0.0:8080")
+	server.Start(u.Get("API_URL"))
 }
