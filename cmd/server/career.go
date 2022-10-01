@@ -16,13 +16,19 @@ func (server *Server) addCareer(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	result, err := server.store.Run("CREATE (est:Career{id:$id})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 

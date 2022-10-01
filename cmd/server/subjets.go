@@ -16,13 +16,19 @@ func (server *Server) addSubject(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	result, err := server.store.Run("CREATE (est:Subject{id:$id})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -40,7 +46,10 @@ func (server *Server) AddSubjectToCareer(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -48,13 +57,19 @@ func (server *Server) AddSubjectToCareer(c *gin.Context) {
 	WHERE subject.id = $id_subject and career.id = $id_career
 	RETURN EXISTS((subject)-[:Belongs]->(career))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	if result.Next() {
 		if result.Record().Values[0].(bool) {
-			c.JSON(http.StatusBadRequest, errorResponse("La asignatura ya pertenece a la carrera"))
+			c.JSON(http.StatusBadRequest, Result{
+				Error:    err.Error(),
+				Response: req,
+			})
 			return
 		}
 	}
@@ -63,7 +78,10 @@ func (server *Server) AddSubjectToCareer(c *gin.Context) {
 	WHERE subject.id = $id_subject and career.id = $id_career
 	CREATE (subject)-[:Belongs]->(career)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -80,7 +98,10 @@ func (server *Server) getGroupsBySubject(c *gin.Context) {
 
 	err := c.ShouldBindUri(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -88,13 +109,19 @@ func (server *Server) getGroupsBySubject(c *gin.Context) {
 	WHERE subject.id = $id 
 	RETURN subject,collect(group) as group`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	userRecord, err := result.Single()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 

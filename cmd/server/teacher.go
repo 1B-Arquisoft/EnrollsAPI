@@ -40,7 +40,10 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -48,13 +51,19 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 	WHERE teacher.id = $id_teacher and group.id = $id_group
 	RETURN EXISTS((teacher)-[:Taught]->(group))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	if result.Next() {
 		if result.Record().Values[0].(bool) {
-			c.JSON(http.StatusBadRequest, errorResponse("La asignatura ya pertenece a la carrera"))
+			c.JSON(http.StatusBadRequest, Result{
+				Error:    "La asignatura ya pertenece a la carrera" + err.Error(),
+				Response: req,
+			})
 			return
 		}
 	}
@@ -63,7 +72,10 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 	WHERE teacher.id = $id_teacher and group.id = $id_group
 	CREATE (teacher)-[:Taught]->(group)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -80,7 +92,10 @@ func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
 
 	err := c.ShouldBindUri(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -88,13 +103,19 @@ func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
 	WHERE teacher.id = $id
 	RETURN teacher,collect(group) as group`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	userRecord, err := result.Single()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 

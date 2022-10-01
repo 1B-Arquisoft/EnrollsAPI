@@ -19,13 +19,19 @@ func (server *Server) addEnrollDate(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Error al bindear la request: "+err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	result, err := server.store.Run("MATCH (sem:Semester{semester:$semester}) CREATE (enrdate:EnrollDate{start_time:datetime($start_time),end_time:datetime($end_time)})-[rel:Belongs]->(sem)", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -44,7 +50,10 @@ func (server *Server) addStudentToDate(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Error al bindear la request: "+err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -52,7 +61,10 @@ func (server *Server) addStudentToDate(c *gin.Context) {
 	WHERE stu.id = $id_student and (enrdate.start_time=datetime($start_time) and enrdate.end_time=datetime($end_time))
 	CREATE (stu)-[daterel:EnrollsOn]->(enrdate)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -71,7 +83,10 @@ func (server *Server) deleteStudentToDate(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Error al bindear la request: "+err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -79,7 +94,10 @@ func (server *Server) deleteStudentToDate(c *gin.Context) {
 	WHERE stu.id = $id_student and (enrdate.start_time=datetime($start_time) and enrdate.end_time=datetime($end_time))
 	DELETE daterel`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB: "+err.Error()))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 

@@ -23,7 +23,10 @@ func (server *Server) addGroup(c *gin.Context) {
 
 	result, err := server.store.Run("CREATE (est:Group{id:$id,semester:$semester})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -49,7 +52,10 @@ func (server *Server) AddGroupToSubject(c *gin.Context) {
 	WHERE subject.id = $id_subject and group.id = $id_group
 	RETURN (EXISTS((group)-[:Belongs]->(subject)) and EXISTS((subject)-[:Has]->(group)))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -64,7 +70,10 @@ func (server *Server) AddGroupToSubject(c *gin.Context) {
 	WHERE subject.id = $id_subject and group.id = $id_group
 	CREATE (subject)-[:Has]->(group)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -81,7 +90,10 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"+err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -89,7 +101,10 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 	WHERE semester.semester = $semester and group.id = $id_group
 	RETURN EXISTS((group)-[:Ocurred]->(semester))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -108,7 +123,10 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 	WHERE semester.semester = $semester and group.id = $id_group
 	CREATE (group)-[ocr:Ocurred]->(semester)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
