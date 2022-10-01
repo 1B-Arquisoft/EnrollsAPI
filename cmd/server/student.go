@@ -11,6 +11,14 @@ type AddStudentRequest struct {
 	ID int64 `json:"id" binding:"required"`
 }
 
+type Result struct {
+	Error    string      `json:"error"`
+	Response interface{} `json:"response"`
+	Message  string      `json:"message"`
+	Result   interface{} `json:"result"`
+	Status   int         `json:"status"`
+}
+
 func (server *Server) addStudent(c *gin.Context) {
 	var req AddStudentRequest
 
@@ -22,11 +30,19 @@ func (server *Server) addStudent(c *gin.Context) {
 
 	result, err := server.store.Run("CREATE (est:Student{id:$id})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse(err.Error()))
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Message:  "Estudiante creado con exito",
+		Response: req,
+		Status:   http.StatusOK,
+	})
 
 }
 
@@ -45,7 +61,10 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -53,13 +72,19 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	WHERE student.id = $id_student and group.id = $id_group
 	RETURN EXISTS((student)-[:Enrolls]->(group))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	if result.Next() {
 		if result.Record().Values[0].(bool) {
-			c.JSON(http.StatusBadRequest, errorResponse("El usuario ya esta inscrito en la asignatura"))
+			c.JSON(http.StatusBadRequest, Result{
+				Error:    "El usuario ya está inscrito en la asignatuura" + err.Error(),
+				Response: req,
+			})
 			return
 		}
 	}
@@ -68,11 +93,19 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	WHERE student.id = $id_student and group.id = $id_group
 	CREATE (student)-[:Enrolls]->(group)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Message:  "Estudiante inscrito a la asignatura con exito",
+		Response: req,
+		Status:   http.StatusOK,
+	})
 }
 
 type DeleteGroupToStudentRequest struct {
@@ -85,19 +118,30 @@ func (server *Server) deleteGroupToStudent(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	result, err := server.store.Run(`MATCH (student:Student)-[rel:Enrolls]->(group:Group)
 		WHERE student.id = $id_student and group.id = $id_group
-		DELETE r`, u.StructToMap(req))
+		DELETE rel`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Message:  "Cancelación de estudiante a grupo exitosa",
+		Status:   http.StatusOK,
+		Response: req,
+	})
 
 }
 
@@ -111,7 +155,10 @@ func (server *Server) AddCareerToStudent(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -119,13 +166,19 @@ func (server *Server) AddCareerToStudent(c *gin.Context) {
 	WHERE student.id = $id_student and career.id = $id_career
 	RETURN EXISTS((student)-[:Study]->(career))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	if result.Next() {
 		if result.Record().Values[0].(bool) {
-			c.JSON(http.StatusBadRequest, errorResponse("El usuario ya esta inscrito en la asignatura"))
+			c.JSON(http.StatusBadRequest, Result{
+				Error:    "El estudiante ya cursa la asignatura" + err.Error(),
+				Response: req,
+			})
 			return
 		}
 	}
@@ -134,11 +187,19 @@ func (server *Server) AddCareerToStudent(c *gin.Context) {
 	WHERE student.id = $id_student and career.id = $id_career
 	CREATE (student)-[:Study]->(career)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Message:  "Estudiante inscrito a carrera exitoso",
+		Response: req,
+		Status:   http.StatusOK,
+	})
 
 }
 
@@ -152,7 +213,10 @@ func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
 
 	err := c.ShouldBindUri(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -160,18 +224,29 @@ func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
 	WHERE student.id = $id
 	RETURN student,collect(group) as groups`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	userRecord, err := result.Single()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	groups, _ := userRecord.Get("groups")
-	c.JSON(http.StatusOK, groups)
+	c.JSON(http.StatusOK, Result{
+		Result:   groups,
+		Message:  "Grupos en los cuales está inscrito el estudiante.",
+		Response: req,
+		Status:   http.StatusOK,
+	})
 
 }
 
@@ -184,7 +259,10 @@ func (server *Server) getCareersByStudent(c *gin.Context) {
 
 	err := c.ShouldBindUri(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
@@ -192,17 +270,28 @@ func (server *Server) getCareersByStudent(c *gin.Context) {
 	WHERE student.id = $id
 	RETURN student,collect(career) as careers`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	userRecord, err := result.Single()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
 	groups, _ := userRecord.Get("careers")
-	c.JSON(http.StatusOK, groups)
+	c.JSON(http.StatusOK, Result{
+		Result:   groups,
+		Message:  "Carrearas que curso un estudiante",
+		Response: req,
+		Status:   http.StatusOK,
+	})
 
 }

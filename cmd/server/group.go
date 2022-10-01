@@ -72,8 +72,8 @@ func (server *Server) AddGroupToSubject(c *gin.Context) {
 }
 
 type AddGroupToSemesterRequest struct {
-	SemesterPeriod int64 `json:"semester_period" binding:"required"`
-	IDGroup        int64 `json:"id_subject" binding:"required"`
+	SemesterPeriod string `json:"semester" binding:"required"`
+	IDGroup        int64  `json:"id_group" binding:"required"`
 }
 
 func (server *Server) AddGroupToSemester(c *gin.Context) {
@@ -81,12 +81,12 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"+err.Error()))
 		return
 	}
 
 	result, err := server.store.Run(`MATCH (semester:Semester),(group:Group)
-	WHERE semester.year = $semester_period and group.id = $id_group
+	WHERE semester.semester = $semester and group.id = $id_group
 	RETURN EXISTS((group)-[:Ocurred]->(semester))`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
@@ -95,18 +95,27 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 
 	if result.Next() {
 		if result.Record().Values[0].(bool) {
-			c.JSON(http.StatusBadRequest, errorResponse("La asignatura ya pertenece a la carrera"))
+			c.JSON(http.StatusBadRequest, Result{
+				Error:    "La asignatura ya pertenece al periodo recibido",
+				Status:   http.StatusBadRequest,
+				Response: req,
+			})
 			return
 		}
 	}
 
 	result, err = server.store.Run(`MATCH (semester:Semester),(group:Group)
-	WHERE semester.year = $semester_period and group.id = $id_group
-	CREATE (group)-[:Ocurred]->(semester)`, u.StructToMap(req))
+	WHERE semester.semester = $semester and group.id = $id_group
+	CREATE (group)-[ocr:Ocurred]->(semester)`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Grupo añadido al periodo academico descrito",
+		Status:   http.StatusOK,
+		Response: req,
+		Result:   result,
+	})
 }
