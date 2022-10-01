@@ -17,7 +17,7 @@ func Setup() *Server {
 	//*------------Creación de Nodos--------------*
 	//? Endpoint | Agregar nodo materia -> {id_materia}
 	router.PUT("/Subjects", server.addSubject)
-	//? Endpoint | Agregar nodo grupo -> {id_grupo}
+	//? Endpoint | Agregar nodo grupo -> {id_grupo,id_semestre}
 	router.PUT("/Groups", server.addGroup)
 	//? Endpoint | Agregar nodo profesor -> {id_profesor}
 	router.PUT("/Teachers", server.addTeacher)
@@ -27,13 +27,15 @@ func Setup() *Server {
 	router.PUT("/Careers", server.addCareer)
 	//? Endpoint | Agregar nodo semestre -> {Semestre}
 	router.PUT("/Semesters", server.addSemester)
+	//? Endpoint | Agregar nodo fecha de inscripcion -> {Semestre,{hora_inicio,hora_fin,fecha}}
+	router.PUT("/EnrollDate", server.addEnrollDate)
 	//*--------------------------------------------*
 
 	//*-------Inscripcion de asignaturas----------*
 	//? Endpoint | Inscribir materia -> {id_estudiante,id_grupo}
 	router.POST("/Enroll", server.addGroupToStudent)
 	//? Endpoint | Cancelar materia -> {id_estudiante,id_grupo}
-	router.DELETE("/Enroll")
+	router.DELETE("/Enroll", server.deleteGroupToStudent)
 	//*--------------------------------------------*
 
 	//*-------Asignacion de relaciones------------*
@@ -43,13 +45,19 @@ func Setup() *Server {
 	router.POST("/Groups/Assing/Subjects", server.AddGroupToSubject)
 	//? Endpoint | Vincular grupo a semestre -> {id_grupo,id_semestre}
 	router.POST("/Groups/Assing/Semesters", server.AddGroupToSemester)
+
+	//*-------Cita de inscripción------------*
+	//? Endpoint | Añadir estudiante a cita de inscripcion -> {id_student,{start_time,end_time}}
+	router.POST("/Student/Assing/EnrollDate", server.addStudentToDate)
+	//? Endpoint | Quitar estudiante a cita de inscripcion -> {id_student,{start_time,end_time}}
+	router.DELETE("/Student/Assing/EnrollDate", server.deleteStudentToDate)
 	//*--------------------------------------------*
 
 	//*------Asignar relaciones a carrera--------*
 	//? Endpoint | Añadir Materia a carrera -> {id_materia,id_carrera}
-	router.POST("/Subjects/Assing/Carrers", server.AddSubjectToCareer)
+	router.POST("/Subjects/Assing/Careers", server.AddSubjectToCareer)
 	//? Endpoint | Añadir Estudiante a carrera -> {id_materia,id_carrera}
-	router.POST("/Students/Assing/Carrers", server.AddCareerToStudent)
+	router.POST("/Students/Assing/Careers", server.AddCareerToStudent)
 	//*--------------------------------------------*
 
 	//*------Obtener Información Estudiante--------*

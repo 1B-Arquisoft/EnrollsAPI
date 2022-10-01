@@ -73,6 +73,31 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+type DeleteGroupToStudentRequest struct {
+	IDStudent int64 `json:"id_student" binding:"required"`
+	IDGroup   int64 `json:"id_group" binding:"required"`
+}
+
+func (server *Server) deleteGroupToStudent(c *gin.Context) {
+	var req AddGroupToStudentRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorResponse(err.Error()))
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (student:Student)-[rel:Enrolls]->(group:Group)
+		WHERE student.id = $id_student and group.id = $id_group
+		DELETE r`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, result)
 
 }
 

@@ -8,7 +8,7 @@ import (
 )
 
 type AddSemesterRequest struct {
-	Year string `json:"year" binding:"required"`
+	Semester string `json:"semester" binding:"required"`
 }
 
 func (server *Server) addSemester(c *gin.Context) {
@@ -16,13 +16,13 @@ func (server *Server) addSemester(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"+err.Error()))
 		return
 	}
 
-	result, err := server.store.Run("CREATE (est:Semester{year:$year})", u.StructToMap(req))
+	result, err := server.store.Run("CREATE (sem:Semester{semester:$semester})", u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"))
+		c.JSON(http.StatusInternalServerError, errorResponse("Error al ingresar el nodo en la DB"+err.Error()))
 		return
 	}
 
