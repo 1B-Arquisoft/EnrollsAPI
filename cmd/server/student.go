@@ -72,7 +72,7 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	WHERE student.id = $id_student and group.id = $id_group
 	RETURN EXISTS((student)-[:Enrolls]->(group))`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Result{
+		c.JSON(http.StatusBadRequest, Result{
 			Error:    err.Error(),
 			Response: req,
 		})
@@ -82,7 +82,7 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	if result.Next() {
 		if result.Record().Values[0].(bool) {
 			c.JSON(http.StatusBadRequest, Result{
-				Error:    "El usuario ya está inscrito en la asignatuura" + err.Error(),
+				Error:    "El usuario ya está inscrito en la asignatuura",
 				Response: req,
 			})
 			return
@@ -93,7 +93,7 @@ func (server *Server) addGroupToStudent(c *gin.Context) {
 	WHERE student.id = $id_student and group.id = $id_group
 	CREATE (student)-[:Enrolls]->(group)`, u.StructToMap(req))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Result{
+		c.JSON(http.StatusBadRequest, Result{
 			Error:    err.Error(),
 			Response: req,
 		})
@@ -114,7 +114,7 @@ type DeleteGroupToStudentRequest struct {
 }
 
 func (server *Server) deleteGroupToStudent(c *gin.Context) {
-	var req AddGroupToStudentRequest
+	var req DeleteGroupToStudentRequest
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
