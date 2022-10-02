@@ -139,6 +139,11 @@ type getGroupsTaughtbyTeacherRequest struct {
 	Semester  string `uri:"semester" json:"semester" binding:"required"`
 }
 
+type getGroupsTaughtbyTeacherResult struct {
+	IDTeacher    int64       `json:"id" binding:"required"`
+	TaughtGroups interface{} `json:"taught_groups" binding:"required"`
+}
+
 func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
 	var req getGroupsTaughtbyTeacherRequest
 
@@ -173,9 +178,12 @@ func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
 
 	groups, _ := userRecord.Get("group")
 	c.JSON(http.StatusOK, Result{
-		Status:   http.StatusOK,
-		Message:  "Peticion Exitosa: Grupos dictador por el profesor",
-		Result:   groups,
+		Status:  http.StatusOK,
+		Message: "Peticion Exitosa: Grupos dictador por el profesor",
+		Result: getGroupsTaughtbyTeacherResult{
+			IDTeacher:    req.IDTeacher,
+			TaughtGroups: groups,
+		},
 		Response: req,
 	})
 
