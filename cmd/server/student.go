@@ -213,6 +213,11 @@ type getGroupsEnrolledByStudentRequest struct {
 	Semester  string `uri:"semester" json:"semester" binding:"required"`
 }
 
+type getGroupsEnrolledByStudentResult struct {
+	IDStudent      int64       `json:"id_student" `
+	EnrolledGroups interface{} `json:"enrolled_groups"`
+}
+
 func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
 	var req getGroupsEnrolledByStudentRequest
 
@@ -248,7 +253,10 @@ func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
 
 	groups, _ := userRecord.Get("groups")
 	c.JSON(http.StatusOK, Result{
-		Result:   groups,
+		Result: getGroupsEnrolledByStudentResult{
+			IDStudent:      req.IDStudent,
+			EnrolledGroups: groups,
+		},
 		Message:  "Grupos en los cuales está inscrito el estudiante.",
 		Response: req,
 		Status:   http.StatusOK,
