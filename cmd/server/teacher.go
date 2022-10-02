@@ -89,7 +89,49 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Status:   http.StatusOK,
+		Message:  "Profesor Asignado a grupo. Petición Exitosa",
+		Response: req,
+	})
+}
+
+type DeleteGroupToTeacherRequest struct {
+	IDStudent int64 `json:"id_teacher" binding:"required"`
+	IDGroup   int64 `json:"id_group" binding:"required"`
+}
+
+func (server *Server) DeleteGroupToTeacher(c *gin.Context) {
+	var req DeleteGroupToTeacherRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (teacher:Teacher)-[rel:Taught]->(group:Group)
+		WHERE teacher.id = $id_teacher and group.id = $id_group
+		DELETE rel`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Message:  "Se desasignó el profesor al grupo. Petición exitosa",
+		Status:   http.StatusOK,
+		Response: req,
+	})
+
 }
 
 type getGroupsTaughtbyTeacherRequest struct {

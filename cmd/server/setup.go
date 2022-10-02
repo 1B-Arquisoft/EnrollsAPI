@@ -41,6 +41,8 @@ func Setup() *Server {
 	//*-------Asignacion de relaciones------------*
 	//? Endpoint | Asignar profe a grupo -> {id_profesor,id_grupo}
 	router.POST("/Groups/Assing/Teachers", server.AddTeacherToGroup)
+	//? Endpoint | Quitar profe a grupo -> {id_profesor,id_grupo}
+	router.DELETE("/Groups/Assing/Teachers", server.DeleteGroupToTeacher)
 	//? Endpoint | Añadir grupo a materia -> {id_grupo,id_materia}
 	router.POST("/Groups/Assing/Subjects", server.AddGroupToSubject)
 	//? Endpoint | Vincular grupo a semestre -> {id_grupo,id_semestre}
