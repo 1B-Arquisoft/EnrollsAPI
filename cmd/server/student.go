@@ -205,7 +205,7 @@ func (server *Server) AddCareerToStudent(c *gin.Context) {
 
 type getGroupsEnrolledByStudentRequest struct {
 	IDStudent int64  `uri:"id" json:"id" binding:"required"`
-	Semester  string `uri:"semester" json:"semester"`
+	Semester  string `uri:"semester" json:"semester" binding:"required"`
 }
 
 func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
@@ -219,10 +219,11 @@ func (server *Server) getGroupsEnrolledByStudent(c *gin.Context) {
 		})
 		return
 	}
+	queryStr := `MATCH (student:Student)-[:Enrolls]->(group:Group)
+	WHERE student.id = $id and group.semester = $semester
+	RETURN student,collect(group) as groups`
 
-	result, err := server.store.Run(`MATCH (student:Student)-[:Enrolls]->(group:Group)
-	WHERE student.id = $id
-	RETURN student,collect(group) as groups`, u.StructToMap(req))
+	result, err := server.store.Run(queryStr, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Result{
 			Error:    err.Error(),

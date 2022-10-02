@@ -84,7 +84,7 @@ func (server *Server) AddTeacherToGroup(c *gin.Context) {
 
 type getGroupsTaughtbyTeacherRequest struct {
 	IDTeacher int64  `uri:"id" json:"id" binding:"required"`
-	Semester  string `uri:"semester" json:"semester"`
+	Semester  string `uri:"semester" json:"semester" binding:"required"`
 }
 
 func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
@@ -100,7 +100,7 @@ func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
 	}
 
 	result, err := server.store.Run(`MATCH (teacher:Teacher)-[:Taught]->(group:Group)
-	WHERE teacher.id = $id
+	WHERE teacher.id = $id and group.semester = $semester
 	RETURN teacher,collect(group) as group`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Result{
@@ -120,6 +120,11 @@ func (server *Server) getGroupsTaughtbyTeacher(c *gin.Context) {
 	}
 
 	groups, _ := userRecord.Get("group")
-	c.JSON(http.StatusOK, groups)
+	c.JSON(http.StatusOK, Result{
+		Status:   http.StatusOK,
+		Message:  "Peticion Exitosa: Grupos dictador por el profesor",
+		Result:   groups,
+		Response: req,
+	})
 
 }

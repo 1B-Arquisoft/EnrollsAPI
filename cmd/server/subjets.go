@@ -32,7 +32,11 @@ func (server *Server) addSubject(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Result:   result,
+		Message:  "Petición realizada con exito: Matería añadida.",
+		Response: req,
+	})
 
 }
 
@@ -85,7 +89,11 @@ func (server *Server) AddSubjectToCareer(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Petición Realizada con exito: Añadido la materia a carrera",
+		Result:   result,
+		Response: req,
+	})
 }
 
 type getGroupsBySubjectRequest struct {
@@ -126,6 +134,10 @@ func (server *Server) getGroupsBySubject(c *gin.Context) {
 	}
 
 	groups, _ := userRecord.Get("group")
-	c.JSON(http.StatusOK, groups)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Petición realizada con exito, obtención de grupos por materias",
+		Result:   groups,
+		Response: req,
+	})
 
 }
