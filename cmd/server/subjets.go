@@ -8,7 +8,7 @@ import (
 )
 
 type AddSubjectRequest struct {
-	ID int64 `json:"id" binding:"required"`
+	ID int64 `json:"id_subject" binding:"required"`
 }
 
 func (server *Server) addSubject(c *gin.Context) {
@@ -97,7 +97,7 @@ func (server *Server) AddSubjectToCareer(c *gin.Context) {
 }
 
 type getGroupsBySubjectRequest struct {
-	IDGroup  int64  `uri:"id" json:"id" binding:"required"`
+	IDGroup  int64  `uri:"id_subject" json:"id" binding:"required"`
 	Semester string `uri:"semester" json:"semester"`
 }
 

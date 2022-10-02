@@ -8,7 +8,7 @@ import (
 )
 
 type AddStudentRequest struct {
-	ID int64 `json:"id" binding:"required"`
+	ID int64 `json:"id_student" binding:"required"`
 }
 
 type Result struct {
@@ -24,11 +24,16 @@ func (server *Server) addStudent(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, Result{
+			Message:  "Debes colocar campos validos en la petición",
+			Error:    err.Error(),
+			Status:   http.StatusBadRequest,
+			Response: req,
+		})
 		return
 	}
 
-	result, err := server.store.Run("CREATE (est:Student{id:$id})", u.StructToMap(req))
+	result, err := server.store.Run("CREATE (est:Student{id:$id_student})", u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Result{
 			Error:    err.Error(),

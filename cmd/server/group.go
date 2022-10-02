@@ -8,7 +8,7 @@ import (
 )
 
 type AddGroupRequest struct {
-	ID       int64  `json:"id" binding:"required"`
+	ID       int64  `json:"id_group" binding:"required"`
 	Semester string `json:"semester" binding:"required"`
 }
 
@@ -17,11 +17,14 @@ func (server *Server) addGroup(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse("Debe colocar un id valido en la petición"))
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
 		return
 	}
 
-	result, err := server.store.Run("CREATE (est:Group{id:$id,semester:$semester})", u.StructToMap(req))
+	result, err := server.store.Run("CREATE (est:Group{id:$id_group,semester:$semester})", u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Result{
 			Error:    err.Error(),
@@ -30,7 +33,12 @@ func (server *Server) addGroup(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Grupo creado con exito!",
+		Status:   http.StatusOK,
+		Response: req,
+		Result:   result,
+	})
 
 }
 

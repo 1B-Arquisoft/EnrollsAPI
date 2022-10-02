@@ -35,7 +35,12 @@ func (server *Server) addEnrollDate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Cita de inscripción creada con exito",
+		Status:   http.StatusOK,
+		Response: req,
+		Result:   result,
+	})
 
 }
 
@@ -68,7 +73,12 @@ func (server *Server) addStudentToDate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Estudiante añadido a cita de inscripción con exito!",
+		Status:   http.StatusOK,
+		Response: req,
+		Result:   result,
+	})
 
 }
 
@@ -101,6 +111,11 @@ func (server *Server) deleteStudentToDate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Status:   http.StatusOK,
+		Message:  "Desasignada cita de inscripción a estudiante",
+		Result:   result,
+		Response: req,
+	})
 
 }

@@ -32,6 +32,11 @@ func (server *Server) addSemester(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, Result{
+		Message:  "Profesor creado con exito!",
+		Status:   http.StatusOK,
+		Response: req,
+		Result:   result,
+	})
 
 }
