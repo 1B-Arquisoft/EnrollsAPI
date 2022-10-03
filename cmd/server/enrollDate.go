@@ -119,3 +119,58 @@ func (server *Server) deleteStudentToDate(c *gin.Context) {
 	})
 
 }
+
+type GetDatesByStudent struct {
+	IDStudent int `uri:"id" json:"id" binding:"required"`
+}
+
+type GetDatesByStudentResult struct {
+	IDStudent int         `json:"id_student"`
+	Dates     interface{} `json:"dates"`
+}
+
+func (server *Server) getDatesByStudent(c *gin.Context) {
+	var req GetDatesByStudent
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (stu:Student) -[daterel:EnrollsOn]-> (enrdate:EnrollDate)
+	WHERE stu.id = $id_student
+	RETURN stu,collect(enrdate) as dates`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	records, err := result.Single()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	dates, _ := records.Get("dates")
+
+	c.JSON(http.StatusOK, Result{
+		Status:  http.StatusOK,
+		Message: "Lista de fechas de inscripción del estudiante",
+		Result: GetDatesByStudentResult{
+			IDStudent: req.IDStudent,
+			Dates:     dates,
+		},
+		Response: req,
+	})
+
+}

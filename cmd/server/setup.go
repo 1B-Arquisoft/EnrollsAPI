@@ -53,6 +53,8 @@ func Setup() *Server {
 	router.POST("/Student/Assing/EnrollDate", server.addStudentToDate)
 	//? Endpoint | Quitar estudiante a cita de inscripcion -> {id_student,{start_time,end_time}}
 	router.DELETE("/Student/Assing/EnrollDate", server.deleteStudentToDate)
+	//? Endpoint | Obtener lista de fechas estudiante a cita de inscripcion -> {id_student,{start_time,end_time}}
+	router.GET("/Student/:id/EnrollDate", server.getDatesByStudent)
 	//*--------------------------------------------*
 
 	//*------Asignar relaciones a carrera--------*
