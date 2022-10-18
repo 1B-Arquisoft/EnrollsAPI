@@ -142,7 +142,7 @@ func (server *Server) getDatesByStudent(c *gin.Context) {
 	}
 
 	result, err := server.store.Run(`MATCH (stu:Student) -[daterel:EnrollsOn]-> (enrdate:EnrollDate)
-	WHERE stu.id = $id_student
+	WHERE stu.id = $id
 	RETURN stu,collect(enrdate) as dates`, u.StructToMap(req))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Result{
