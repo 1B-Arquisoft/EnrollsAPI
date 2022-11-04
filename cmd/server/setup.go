@@ -79,6 +79,7 @@ func Setup() *Server {
 	//*--------Obtener información Materias----------*
 	//? Endpoint | Obtener grupos de la materia -> {id_materia,opcional:semestre}
 	router.GET("/Subject/:id/Groups/:semester", server.getGroupsBySubject)
+	router.GET("/Group/:id", server.getGroupInfo)
 	//*--------------------------------------------*
 
 	server.router = router

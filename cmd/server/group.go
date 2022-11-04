@@ -145,3 +145,95 @@ func (server *Server) AddGroupToSemester(c *gin.Context) {
 		Result:   result,
 	})
 }
+
+type GetStudentsEnrolledInGroupRequest struct {
+	IDGroup int64 `uri:"id" json:"id_group" binding:"required"`
+}
+
+func (server *Server) getGroupInfo(c *gin.Context) {
+	var req GetStudentsEnrolledInGroupRequest
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (group:Group),(student:Student),(teacher:Teacher)
+	WHERE group.id = $id_group and (student)-[:Enrolls]->(group) and (teacher)-[:Taught]->(group)
+	RETURN group,collect(student) as students, teacher as teacher`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	records, err := result.Single()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	students, _ := records.Get("students")
+	teacher, _ := records.Get("teacher")
+
+	c.JSON(http.StatusOK, Result{
+		Message:  "Grupo añadido al periodo academico descrito",
+		Status:   http.StatusOK,
+		Response: req,
+		Result: GetGroupInfoResult{
+			IDGroup:  req.IDGroup,
+			Students: students,
+			Teacher:  teacher,
+		},
+	})
+}
+
+type GetGroupInfoResult struct {
+	IDGroup  int64       `json:"id_group"`
+	Students interface{} `json:"id_students"`
+	Teacher  interface{} `json:"id_teacher"`
+}
+
+type getTeacherInGroupRequest struct {
+	IDGroup int64 `uri:"id" binding:"required"`
+}
+
+func (server *Server) getTeacherInGroup(c *gin.Context) {
+	var req getTeacherInGroupRequest
+
+	err := c.ShouldBindUri(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	result, err := server.store.Run(`MATCH (group:Group) (teacher:Teacher)
+	WHERE group.id = $id_group
+	RETURN (teacher)-[:Taught]->(group)`, u.StructToMap(req))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, Result{
+			Error:    err.Error(),
+			Response: req,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, Result{
+		Message:  "Grupo añadido al periodo academico descrito",
+		Status:   http.StatusOK,
+		Response: req,
+		Result:   result,
+	})
+}
