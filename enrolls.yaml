@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ilb-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ilb-deployment
+  template:
+    metadata:
+      labels:
+        app: ilb-deployment
+    spec:
+      containers:
+      - name: enrolls
+        image: gcr.io/siuu-368905/enrrollments:siuu
